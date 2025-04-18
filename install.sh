@@ -38,5 +38,26 @@ ingress:
   - service: http_status:404
 EOF
 
+# 配置开机自启动
+echo "📦 配置开机自启动..."
+cat <<EOF > /etc/systemd/system/cloudflared.service
+[Unit]
+Description=Cloudflare Tunnel
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/cloudflared tunnel run myhome
+Restart=always
+User=root
+LimitNOFILE=4096
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# 使能开机自启动
+systemctl enable cloudflared.service
+systemctl start cloudflared.service
+
 echo "📡 启动 Cloudflare Tunnel..."
-cloudflared tunnel run myhome
+systemctl start cloudflared.service
